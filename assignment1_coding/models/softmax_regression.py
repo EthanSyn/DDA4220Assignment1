@@ -44,6 +44,22 @@ class SoftmaxRegression(_baseNetwork):
         # Hint:                                                                     #
         #   Store your intermediate outputs before ReLU for backwards               #
         #############################################################################
+        N = X.shape[0]
+        
+        # Forward pass: Linear layer (no bias)
+        scores = X.dot(self.weights['W1'])  # (N, num_classes)
+        
+        # Apply ReLU activation
+        scores_relu = self.ReLU(scores)
+        
+        # Apply softmax
+        probs = self.softmax(scores_relu)
+        
+        # Compute loss
+        loss = self.cross_entropy_loss(probs, y)
+        
+        # Compute accuracy
+        accuracy = self.compute_accuracy(probs, y)
 
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -57,8 +73,18 @@ class SoftmaxRegression(_baseNetwork):
         #        1) Compute gradients of each weight by chain rule                  #
         #        2) Store the gradients in self.gradients                           #
         #############################################################################
-
-
+        
+        # Backward pass
+        # Gradient of softmax and cross-entropy: dL/d(scores_relu)
+        dscores_relu = probs.copy()
+        dscores_relu[range(N), y] -= 1
+        dscores_relu /= N
+        
+        # Gradient through ReLU
+        dscores = dscores_relu * self.ReLU_dev(scores)
+        
+        # Gradient of W1: dL/dW1 = X^T @ dscores
+        self.gradients['W1'] = X.T.dot(dscores)
 
         #############################################################################
         #                              END OF YOUR CODE                             #

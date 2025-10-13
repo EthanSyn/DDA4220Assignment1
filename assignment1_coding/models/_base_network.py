@@ -28,7 +28,10 @@ class _baseNetwork:
         # TODO:                                                                     #
         #    1) Calculate softmax scores of input images                            #
         #############################################################################
-
+        # Numerically stable softmax
+        shifted_scores = scores - np.max(scores, axis=1, keepdims=True)
+        exp_scores = np.exp(shifted_scores)
+        prob = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
 
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -47,7 +50,12 @@ class _baseNetwork:
         # TODO:                                                                     #
         #    1) Implement Cross-Entropy Loss                                        #
         #############################################################################
-
+        N = x_pred.shape[0]
+        # Add small epsilon to avoid log(0)
+        epsilon = 1e-12
+        # Select the probabilities corresponding to the true labels
+        correct_log_probs = -np.log(x_pred[range(N), y] + epsilon)
+        loss = np.sum(correct_log_probs) / N
 
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -66,7 +74,10 @@ class _baseNetwork:
         # TODO:                                                                     #
         #    1) Implement the accuracy function                                     #
         #############################################################################
-
+        # Get predicted class (highest probability)
+        y_pred = np.argmax(x_pred, axis=1)
+        # Compare with true labels
+        acc = np.mean(y_pred == y)
 
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -84,7 +95,7 @@ class _baseNetwork:
         #############################################################################
         # TODO: Comput the sigmoid activation on the input                          #
         #############################################################################
-
+        out = 1 / (1 + np.exp(-X))
 
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -101,7 +112,8 @@ class _baseNetwork:
         # TODO:                                                                     #
         #    1) Implement the derivative of Sigmoid function                        #
         #############################################################################
-
+        s = self.sigmoid(x)
+        ds = s * (1 - s)
 
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -119,7 +131,7 @@ class _baseNetwork:
         #############################################################################
         # TODO: Comput the ReLU activation on the input                          #
         #############################################################################
-
+        out = np.maximum(0, X)
 
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -137,7 +149,7 @@ class _baseNetwork:
         #############################################################################
         # TODO: Comput the gradient of ReLU activation                              #
         #############################################################################
-
+        out = (X > 0).astype(float)
 
         #############################################################################
         #                              END OF YOUR CODE                             #

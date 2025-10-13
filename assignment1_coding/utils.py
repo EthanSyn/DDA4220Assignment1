@@ -114,7 +114,27 @@ def generate_batched_data(data, label, batch_size=32, shuffle=False, seed=None):
     #    It's okay if the size of your last batch is smaller than the required  #
     #    batch size                                                             #
     #############################################################################
-
+    
+    # Convert to numpy arrays for easier manipulation
+    data = np.array(data)
+    label = np.array(label)
+    
+    # Shuffle if needed
+    if shuffle:
+        indices = np.arange(len(data))
+        np.random.shuffle(indices)
+        data = data[indices]
+        label = label[indices]
+    
+    # Generate batches
+    batched_data = []
+    batched_label = []
+    num_samples = len(data)
+    
+    for i in range(0, num_samples, batch_size):
+        end_idx = min(i + batch_size, num_samples)
+        batched_data.append(data[i:end_idx])
+        batched_label.append(label[i:end_idx])
 
     #############################################################################
     #                              END OF YOUR CODE                             #
@@ -210,7 +230,32 @@ def plot_curves(train_loss_history, train_acc_history, valid_loss_history, valid
     #    1) Plot learning curves of training and validation loss                #
     #    2) Plot learning curves of training and validation accuracy            #
     #############################################################################
-
+    
+    epochs = range(1, len(train_loss_history) + 1)
+    
+    # Plot loss curves
+    plt.figure(figsize=(10, 5))
+    plt.plot(epochs, train_loss_history, 'b-', label='Training Loss')
+    plt.plot(epochs, valid_loss_history, 'r-', label='Validation Loss')
+    plt.title('Training and Validation Loss')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(fname_prefix + 'loss_curve.png')
+    plt.close()
+    
+    # Plot accuracy curves
+    plt.figure(figsize=(10, 5))
+    plt.plot(epochs, train_acc_history, 'b-', label='Training Accuracy')
+    plt.plot(epochs, valid_acc_history, 'r-', label='Validation Accuracy')
+    plt.title('Training and Validation Accuracy')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(fname_prefix + 'accuracy_curve.png')
+    plt.close()
 
     #############################################################################
     #                              END OF YOUR CODE                             #

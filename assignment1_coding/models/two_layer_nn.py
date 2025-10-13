@@ -62,8 +62,21 @@ class TwoLayerNet(_baseNetwork):
         #    2) Compute Cross-Entropy Loss and batch accuracy based on network      #
         #       outputs                                                             #
         #############################################################################
-
-
+        N = X.shape[0]
+        
+        # First layer: Linear + Sigmoid
+        z1 = X.dot(self.weights['W1']) + self.weights['b1']  # (N, hidden_size)
+        a1 = self.sigmoid(z1)  # (N, hidden_size)
+        
+        # Second layer: Linear
+        z2 = a1.dot(self.weights['W2']) + self.weights['b2']  # (N, num_classes)
+        
+        # Softmax
+        probs = self.softmax(z2)
+        
+        # Compute loss and accuracy
+        loss = self.cross_entropy_loss(probs, y)
+        accuracy = self.compute_accuracy(probs, y)
 
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -79,9 +92,27 @@ class TwoLayerNet(_baseNetwork):
         #          You may also want to implement the analytical derivative of      #
         #          the sigmoid function in self.sigmoid_dev first                   #
         #############################################################################
-
-
-
+        
+        if mode == 'train':
+            # Backward pass
+            # Gradient of softmax and cross-entropy: dL/dz2
+            dz2 = probs.copy()
+            dz2[range(N), y] -= 1
+            dz2 /= N
+            
+            # Gradients for W2 and b2
+            self.gradients['W2'] = a1.T.dot(dz2)  # (hidden_size, num_classes)
+            self.gradients['b2'] = np.sum(dz2, axis=0)  # (num_classes,)
+            
+            # Gradient through second layer
+            da1 = dz2.dot(self.weights['W2'].T)  # (N, hidden_size)
+            
+            # Gradient through sigmoid
+            dz1 = da1 * self.sigmoid_dev(z1)  # (N, hidden_size)
+            
+            # Gradients for W1 and b1
+            self.gradients['W1'] = X.T.dot(dz1)  # (input_size, hidden_size)
+            self.gradients['b1'] = np.sum(dz1, axis=0)  # (hidden_size,)
 
         #############################################################################
         #                              END OF YOUR CODE                             #

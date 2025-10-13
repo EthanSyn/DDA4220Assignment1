@@ -18,7 +18,12 @@ class _BaseOptimizer:
         #    1) Apply L2 penalty to model weights based on the regularization       #
         #       coefficient                                                         #
         #############################################################################
-
+        
+        # Apply L2 regularization to all weight parameters (not biases)
+        for key in model.weights:
+            # Only apply regularization to weight matrices (W1, W2, etc.), not biases (b1, b2, etc.)
+            if key.startswith('W'):
+                model.gradients[key] += self.reg * model.weights[key]
 
         #############################################################################
         #                              END OF YOUR CODE                             #
