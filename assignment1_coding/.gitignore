@@ -1,0 +1,16 @@
+# Data files - 忽略大数据文件
+data/*.csv
+data/*.zip
+data/archive*.zip
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Submission files
+*.tar.gz
+
+# Model checkpoints
+*.pth
+*.pt
+
