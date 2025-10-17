@@ -20,7 +20,10 @@ def load_csv(path):
         images = fp.readlines()
         images = [img.rstrip() for img in images]
 
-        for img in images:
+        for idx, img in enumerate(images):
+            # Skip the header line
+            if idx == 0:
+                continue
             img_as_list = img.split(',')
             y = int(img_as_list[0]) # first entry as label
             x = img_as_list[1:]

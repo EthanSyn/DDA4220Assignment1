@@ -29,7 +29,34 @@ class AdamW(_BaseOptimizer):
         #    3) Compute bias-corrected estimates                                    #
         #    4) Update parameters using AdamW rule (including regularization)       #
         #############################################################################
-
+        
+        for key in model.weights:
+            # Initialize m and v if not present
+            if key not in self.m:
+                self.m[key] = np.zeros_like(model.weights[key])
+                self.v[key] = np.zeros_like(model.weights[key])
+            
+            # Get current gradient
+            grad = model.gradients[key]
+            
+            # Update biased first moment estimate
+            self.m[key] = self.beta1 * self.m[key] + (1 - self.beta1) * grad
+            
+            # Update biased second moment estimate
+            self.v[key] = self.beta2 * self.v[key] + (1 - self.beta2) * (grad ** 2)
+            
+            # Compute bias-corrected first moment estimate
+            m_hat = self.m[key] / (1 - self.beta1 ** self.t)
+            
+            # Compute bias-corrected second moment estimate
+            v_hat = self.v[key] / (1 - self.beta2 ** self.t)
+            
+            # AdamW update rule: apply weight decay directly to weights
+            if key.startswith('W'):  # Apply regularization only to weights, not biases
+                model.weights[key] = model.weights[key] * (1 - self.learning_rate * self.reg)
+            
+            # Adam update
+            model.weights[key] -= self.learning_rate * m_hat / (np.sqrt(v_hat) + self.epsilon)
 
         #############################################################################
         #                              END OF YOUR CODE                             #
